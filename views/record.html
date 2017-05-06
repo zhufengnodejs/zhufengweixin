@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>录音接口</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <style>
+        .container{
+            width:100px;
+            margin:20px 30px;
+            font-size:40px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <button id="recordBtn">开始录音</button>
+    <div id="title"></div>
+    <div id="year"></div>
+    <div id="poster"></div>
+</div>
+
+<script src="https://cdn.bootcss.com/zepto/1.0rc1/zepto.min.js"></script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+<script type="text/javascript">
+    wx.config({
+        debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        appId: '<%=appId%>', // 必填，公众号的唯一标识
+        timestamp: '<%=timestamp%>', // 必填，生成签名的时间戳
+        nonceStr: '<%=nonceStr%>', // 必填，生成签名的随机串
+        signature: '<%=signature%>',// 必填，签名，见附录1
+        jsApiList: [
+            'onMenuShareTimeline',
+            'onMenuShareAppMessage',
+            'startRecord',
+            'stopRecord',
+            'translateVoice'
+        ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+    });
+    wx.ready(function () {
+        wx.checkJsApi({
+            jsApiList: [
+                'onMenuShareTimeline',
+                'onMenuShareAppMessage',
+                'startRecord',
+                'stopRecord',
+                'onVoiceRecordEnd',
+                'translateVoice',
+                'previewImage'
+            ],
+            success: function(res) {
+                // 以键值对的形式返回，可用的api值true，不可用为false
+                // 如：{"checkResult":{"chooseImage":true},"errMsg":"checkJsApi:ok"}
+                alert(res.checkResult);
+            }
+        });
+        wx.onMenuShareAppMessage({
+            title: '珠峰前端架构师之路之React课程', // 分享标题
+            desc: '本课程属于前端架构师级别的高级课程，由浅入深地详细讲解每块知识点。课程内容将包含五大主题内容：掌握现代化高级前端的基础核心技能github npm、shell、手把手教你使用webpack搭建完整工作流、使用ES6开发自己的前端类库、使用React+ReactRouter+Redux开发你的第一个真实的React应用和基于React+Node.js的前后端同构应用开发。', // 分享描述
+            link: 'http://www.zhufengpeixun.cn', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+            imgUrl: 'http://www.zhufengpeixun.cn/react/img/react.jpg', // 分享图标
+            type: 'link', // 分享类型,music、video或link，不填默认为link
+            dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+            success: function () {
+                // 用户确认分享后执行的回调函数
+                alert('分享成功!')
+            },
+            cancel: function () {
+                // 用户取消分享后执行的回调函数
+                alert('分享取消!')
+            }
+        });
+
+        let isRecording = false;
+        $('#recordBtn').on('tap',function () {
+            if(!isRecording){
+                isRecording = true;
+                $(this).html('停止录音');
+                wx.startRecord({
+                    cancel(){
+                        window.alert('开始搜索了哦');
+                    }
+                });
+                return;
+            }
+            isRecording = false;
+            $(this).html('开始录音');
+            wx.stopRecord({
+                success(res){
+                    let localId = res.localId;
+                    wx.translateVoice({
+                        localId,
+                        isShowProgressTips:1,
+                        success(res){
+                            let name = res.translateResult;
+                            name = '天下无贼';
+                            $.ajax({
+                                type:'get',
+                                url:'https://api.douban.com/v2/movie/search?q='+name,
+                                dataType:'jsonp',
+                                jsonp:'callback',
+                                success(result){
+                                    let subject = result.subjects[0];
+                                    $('#title').html(subject.title);
+                                    $('#year').html(subject.year);
+                                    $('#poster').html(`<img src="${subject.images.large}"/>`);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,15 +1,12 @@
 let express = require('express');
-let {appID,appsecret,Token} = require('./config');
+let path = require('path');
 let crypto = require('crypto');
 let app = express();
-app.get('/', function (req, res) {
-  let {signature, timestamp, nonce, echostr} = req.query;
-  let str = [Token,timestamp, nonce].sort().join('');
-  str =  crypto.createHash('sha1').update(str).digest('hex');
-  if(signature == str){
-    res.send(echostr);
-  }else{
-    res.send('wrong');
-  }
-});
+app.set('view engine','html');
+app.set('views',path.resolve('views'));
+app.engine('html',require('ejs').__express);
+let index = require('./routes/index');
+let pages = require('./routes/pages');
+app.use('/',index);
+app.use('/pages',pages);
 app.listen(8080)
