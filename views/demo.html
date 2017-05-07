@@ -3,9 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        #container{
+            margin:20px 20px;
+            font-size:40px;
+        }
+    </style>
 </head>
 <body>
-demo
+<div id="container">
+<button id="recordBtn">开始录音</button>
+<div id="result"></div>
+</div>
+<script src="https://cdn.bootcss.com/zepto/1.0rc1/zepto.min.js"></script>
 <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
 <script type="text/javascript">
     wx.config({
@@ -15,6 +25,30 @@ demo
         nonceStr: '<%=nonceStr%>',
         signature: '<%=signature%>',
         jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'startRecord', 'stopRecord', 'translateVoice']
+    });
+    wx.ready(function(){
+        let recording = false;
+        $('#recordBtn').on('tap',function(){
+            if(recording){
+                wx.stopRecord({
+                    success: function (res) {
+                        var localId = res.localId;
+                        wx.translateVoice({
+                            localId,
+                            isShowProgressTips: 1,
+                            success: function (res) {
+                               $('#result').html(res.translateResult);
+                            }
+                        });
+                    }
+                });
+            }else{
+                wx.startRecord();
+                $('#recordBtn').html('停止录音');
+            }
+
+
+        });
     });
 </script>
 </body>

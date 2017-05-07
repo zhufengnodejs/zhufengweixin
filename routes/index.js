@@ -1,4 +1,5 @@
 let express = require('express');
+let {Token} = require('../config');
 let router = express.Router();
 router.get('/', function (req, res) {
     let {signature, timestamp, nonce, echostr} = req.query;

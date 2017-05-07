@@ -27,7 +27,7 @@ router.get('/demo', async function (req, res) {
     //注意参数名全是小写
     let str = [`noncestr=${nonceStr}`,`jsapi_ticket=${ticket}`,`timestamp=${timestamp}`,`url=http://6c24537b.ngrok.io/pages/record`].sort().join('&');
     let signature  =  crypto.createHash('sha1').update(str).digest('hex');
-    res.render('record',{
+    res.render('demo',{
         appId:appID,
         timestamp,
         nonceStr,
