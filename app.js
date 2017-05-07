@@ -9,4 +9,4 @@ let index = require('./routes/index');
 let pages = require('./routes/pages');
 app.use('/',index);
 app.use('/pages',pages);
-app.listen(8080)
+app.listen(80)
